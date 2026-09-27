@@ -19,14 +19,22 @@ static_objects:
   max_blob_area_px: 20000
   learning_rate: 0.001
   stable_frames: 15
+  warmup_seconds: 3
+  match_distance_px: 25
+  missing_seconds: 1.5
+  max_foreground_ratio: 0.3
+  person_padding: 0.1
 
 # ---------- Littering event engine ----------
 event_engine:
-  link_distance_px: 80
-  leave_distance_px: 150
-  static_seconds: 5
-  redeem_seconds: 30
-  cooldown_seconds: 60
+  link_distance_px: 80           # object must appear this close to a person's path
+  leave_distance_px: 150         # person must move this far away
+  static_seconds: 5              # object must stay this long after person leaves
+  redeem_seconds: 30             # window for the person to come back and pick it up
+  cooldown_seconds: 60           # no repeat alerts at the same spot for this long
+  cooldown_radius_px: 50
+  redeem_proximity_seconds: 5    # someone must have been near when the object vanished
+  require_person: true           # set false only for quick desk tests without a person
   track_history_seconds: 5
 
 # ---------- Evidence ----------

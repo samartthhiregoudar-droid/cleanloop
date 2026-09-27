@@ -1,0 +1,36 @@
+# ---------- Video input ----------
+camera:
+  id: cam_1
+  name: "Demo Camera"
+  location: "Main Corridor"
+  source: 0
+  frame_width: 640
+  reconnect_seconds: 5
+
+# ---------- Detection ----------
+detection:
+  model: yolo11n.pt
+  min_person_conf: 0.5
+  device: auto
+
+# ---------- Static object detection (MOG2) ----------
+static_objects:
+  min_blob_area_px: 300
+  max_blob_area_px: 20000
+  learning_rate: 0.001
+  stable_frames: 15
+
+# ---------- Littering event engine ----------
+event_engine:
+  link_distance_px: 80
+  leave_distance_px: 150
+  static_seconds: 5
+  redeem_seconds: 30
+  cooldown_seconds: 60
+  track_history_seconds: 5
+
+# ---------- Evidence ----------
+evidence:
+  clip_seconds_before: 5
+  clip_seconds_after: 5
+  retention_days: 7

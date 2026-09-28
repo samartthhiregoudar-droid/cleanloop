@@ -8,8 +8,14 @@ Usage:
 """
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
+
+# Add project root to sys.path so vision package is found
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from vision.config import ROOT, load_config
 from vision.pipeline import CleanLoopPipeline

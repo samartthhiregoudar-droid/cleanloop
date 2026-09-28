@@ -67,10 +67,26 @@ class PersonTracker:
 
         Returns (track, distance) or (None, None).
         """
-        best, best_dist = None, None
+        candidates = self.find_recent_candidates(point, max_distance, limit=1)
+        if candidates:
+            return candidates[0][0], candidates[0][1]
+        return None, None
+
+    def find_recent_candidates(self, point, max_distance, limit=3):
+        """Correlate static object position backward in time with recent ByteTrack trajectories.
+
+        Returns list of tuples: [(track, min_distance, last_seen_time), ...] sorted by closest distance.
+        """
+        results = []
         for track in self.tracks.values():
-            for _, p in track.points:
+            min_d = None
+            for ts, p in track.points:
                 d = distance(p, point)
-                if d <= max_distance and (best_dist is None or d < best_dist):
-                    best, best_dist = track, d
-        return best, best_dist
+                if d <= max_distance and (min_d is None or d < min_d):
+                    min_d = d
+            if min_d is not None:
+                results.append((track, min_d, track.last_seen))
+
+        # Sort primarily by spatial proximity to object, secondarily by recency
+        results.sort(key=lambda item: (item[1], -item[2]))
+        return results[:limit]

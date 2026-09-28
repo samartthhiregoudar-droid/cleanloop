@@ -122,6 +122,12 @@ def read_analytics():
     return get_analytics()
 
 
+@app.get("/api/leaderboard")
+def read_leaderboard():
+    from backend.database import get_station_leaderboard
+    return get_station_leaderboard()
+
+
 @app.post("/api/nudge/test")
 def trigger_test_nudge():
     nudge = AudioNudge()

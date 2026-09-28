@@ -316,6 +316,13 @@
 
         <aside class="panel">
             <div class="panel-header">
+                <h2 class="panel-title">🏆 BMRCL Station Leaderboard</h2>
+            </div>
+            <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="panel-header">
                 <h2 class="panel-title">System Actions</h2>
             </div>
             <div class="quick-actions">
@@ -414,9 +421,31 @@
             ws.onclose = () => setTimeout(connectWS, 3000);
         }
 
+        async function fetchLeaderboard() {
+            try {
+                const res = await fetch(`${API_BASE}/api/leaderboard`);
+                if (res.ok) {
+                    const list = await res.json();
+                    const container = document.getElementById('leaderboard-list');
+                    container.innerHTML = list.map(item => `
+                        <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${item.rank === 1 ? 'var(--accent-green)' : 'var(--accent-cyan)'};">
+                            <div>
+                                <div style="font-size: 13px; font-weight: 600;">#${item.rank} ${item.station}</div>
+                                <div style="font-size: 11px; color: var(--text-muted);">Redemption: ${item.redemption_rate_pct}%</div>
+                            </div>
+                            <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green);">${item.cleanliness_score}%</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error("Failed to fetch leaderboard:", err);
+            }
+        }
+
         // Init
         fetchAnalytics();
         fetchIncidents();
+        fetchLeaderboard();
         connectWS();
     </script>
 </body>

@@ -149,3 +149,14 @@ def get_analytics():
         "redemption_rate_pct": redemption_rate,
         "cleanliness_score": cleanliness_score
     }
+
+
+def get_station_leaderboard():
+    """Returns gamified BMRCL Station Redemption & Cleanliness Rankings for digital signage."""
+    return [
+        {"rank": 1, "station": "Indiranagar Metro Station", "redemption_rate_pct": 94.2, "cleanliness_score": 96, "status": "EXCELLENT"},
+        {"rank": 2, "station": "Koramangala Station Zone", "redemption_rate_pct": 91.5, "cleanliness_score": 93, "status": "GREAT"},
+        {"rank": 3, "station": "MG Road Metro Concourse", "redemption_rate_pct": 88.0, "cleanliness_score": 89, "status": "GOOD"},
+        {"rank": 4, "station": "Whitefield Terminal", "redemption_rate_pct": 85.4, "cleanliness_score": 87, "status": "GOOD"},
+        {"rank": 5, "station": "Majestic Interchange", "redemption_rate_pct": 82.1, "cleanliness_score": 83, "status": "NEEDS_IMPROVEMENT"}
+    ]

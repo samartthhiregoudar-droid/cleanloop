@@ -67,3 +67,13 @@ def draw_banner(frame, text, color=(0, 0, 255)):
     h, w = frame.shape[:2]
     cv2.rectangle(frame, (0, h - 40), (w, h), color, -1)
     cv2.putText(frame, text, (10, h - 12), FONT, 0.6, (255, 255, 255), 2)
+
+
+def draw_roi_zone(frame, roi):
+    if not roi or roi == [0.0, 0.0, 1.0, 1.0]:
+        return
+    h, w = frame.shape[:2]
+    ymin, xmin, ymax, xmax = roi
+    x1, y1, x2, y2 = int(xmin * w), int(ymin * h), int(xmax * w), int(ymax * h)
+    cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 255, 0), 1)
+    cv2.putText(frame, "MONITORED SET ZONE", (x1 + 10, y1 + 20), FONT, 0.45, (255, 255, 0), 1)

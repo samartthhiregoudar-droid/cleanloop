@@ -10,7 +10,7 @@ from vision.event_engine import EventEngine
 from vision.nudge import AudioNudge
 from vision.static_objects import StaticObjectDetector
 from vision.tracker import PersonTracker
-from vision.visualize import draw_banner, draw_cases, draw_objects, draw_people, draw_status
+from vision.visualize import draw_banner, draw_cases, draw_objects, draw_people, draw_roi_zone, draw_status
 
 
 class CleanLoopPipeline:
@@ -79,6 +79,7 @@ class CleanLoopPipeline:
 
         # 5. Handle events (audio nudge, evidence snapshots/clips, callbacks)
         annotated = frame.copy()
+        draw_roi_zone(annotated, self.static_detector.target_zone_roi)
         draw_people(annotated, people, self.tracker)
         draw_objects(annotated, self.static_detector.objects.values())
         draw_cases(annotated, self.engine.cases.values(), self.tracker, ts)

@@ -56,7 +56,8 @@ class StaticObject:
 class StaticObjectDetector:
     def __init__(self, min_blob_area_px=300, max_blob_area_px=20000, learning_rate=0.001,
                  stable_frames=15, warmup_seconds=3, match_distance_px=25,
-                 missing_seconds=1.5, max_foreground_ratio=0.3, person_padding=0.1, **_):
+                 missing_seconds=1.5, max_foreground_ratio=0.3, person_padding=0.1,
+                 require_person_origin=True, target_zone_roi=None, **_):
         self.min_area = min_blob_area_px
         self.max_area = max_blob_area_px
         self.learning_rate = learning_rate
@@ -66,6 +67,8 @@ class StaticObjectDetector:
         self.missing_seconds = missing_seconds
         self.max_fg_ratio = max_foreground_ratio
         self.person_padding = person_padding
+        self.require_person_origin = require_person_origin
+        self.target_zone_roi = target_zone_roi or [0.0, 0.0, 1.0, 1.0]
         self.kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         self.reset()
 
@@ -83,6 +86,12 @@ class StaticObjectDetector:
         px = int((x2 - x1) * self.person_padding)
         py = int((y2 - y1) * self.person_padding)
         return (max(0, x1 - px), max(0, y1 - py), min(w, x2 + px), min(h, y2 + py))
+
+    def _in_target_zone(self, box, w, h):
+        """Check if center of blob is within target_zone_roi [ymin, xmin, ymax, xmax]."""
+        cx, cy = _center(box)
+        ymin, xmin, ymax, xmax = self.target_zone_roi
+        return (xmin * w <= cx <= xmax * w) and (ymin * h <= cy <= ymax * h)
 
     def _is_added(self, frame, bbox):
         """More edges now than in the background = something was placed there."""
@@ -136,7 +145,9 @@ class StaticObjectDetector:
         for c in contours:
             if self.min_area <= cv2.contourArea(c) <= self.max_area:
                 x, y, bw, bh = cv2.boundingRect(c)
-                blobs.append((x, y, x + bw, y + bh))
+                bbox = (x, y, x + bw, y + bh)
+                if self._in_target_zone(bbox, w, h):
+                    blobs.append(bbox)
 
         self._match(blobs, now, frame, people)
         return self.stable_objects()

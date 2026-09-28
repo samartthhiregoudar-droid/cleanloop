@@ -24,6 +24,8 @@ static_objects:
   missing_seconds: 1.5
   max_foreground_ratio: 0.3
   person_padding: 0.2               # 20% padding around people to ignore feet/shadow artifacts
+  require_person_origin: true       # Ignore random background noise; ONLY track items dropped by people
+  target_zone_roi: [0.2, 0.0, 1.0, 1.0] # [ymin, xmin, ymax, xmax] fraction of frame for set ground area
 
 # ---------- Littering event engine ----------
 event_engine:

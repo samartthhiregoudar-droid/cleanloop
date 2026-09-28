@@ -17,6 +17,11 @@ class Detection:
     bbox: tuple  # (x1, y1, x2, y2) in pixels
     conf: float
     label: str
+    bbox_extended: tuple = None  # Extended box including held/carried objects
+
+    def __post_init__(self):
+        if self.bbox_extended is None:
+            self.bbox_extended = self.bbox
 
     @property
     def center(self):
@@ -47,24 +52,49 @@ class Detector:
         self._labeler = None  # created on first use
 
     def track_people(self, frame):
-        """Detect and track people. Returns a list of Detection with track IDs."""
+        """Detect and track people along with held objects as body extensions."""
         results = self.tracker_model.track(
             frame,
             persist=True,
-            tracker="bytetrack.yaml",
-            classes=[PERSON_CLASS],
             conf=self.min_person_conf,
             device=self.device,
             verbose=False,
         )
         boxes = results[0].boxes
-        if boxes is None or boxes.id is None:
+        if boxes is None:
             return []
 
-        detections = []
-        for xyxy, conf, tid in zip(boxes.xyxy.tolist(), boxes.conf.tolist(), boxes.id.int().tolist()):
+        # Extract people and all non-person object candidate boxes in the frame
+        people_boxes = []
+        object_boxes = []
+
+        cls_list = boxes.cls.tolist() if boxes.cls is not None else []
+        conf_list = boxes.conf.tolist() if boxes.conf is not None else []
+        xyxy_list = boxes.xyxy.tolist() if boxes.xyxy is not None else []
+        ids_list = boxes.id.int().tolist() if boxes.id is not None else [None] * len(xyxy_list)
+
+        for xyxy, conf, cls, tid in zip(xyxy_list, conf_list, cls_list, ids_list):
             bbox = tuple(int(v) for v in xyxy)
-            detections.append(Detection(tid, bbox, float(conf), "person"))
+            if int(cls) == PERSON_CLASS:
+                people_boxes.append((tid, bbox, float(conf)))
+            else:
+                object_boxes.append(bbox)
+
+        detections = []
+        for tid, p_box, conf in people_boxes:
+            px1, py1, px2, py2 = p_box
+            ex1, ey1, ex2, ey2 = px1, py1, px2, py2
+
+            # Merge any overlapping/touching object boxes into person's body extension
+            for ox1, oy1, ox2, oy2 in object_boxes:
+                # Check overlap or proximity
+                if not (ox2 < px1 - 30 or ox1 > px2 + 30 or oy2 < py1 - 30 or oy1 > py2 + 30):
+                    ex1, ey1 = min(ex1, ox1), min(ey1, oy1)
+                    ex2, ey2 = max(ex2, ox2), max(ey2, oy2)
+
+            ext_bbox = (ex1, ey1, ex2, ey2)
+            detections.append(Detection(tid, p_box, conf, "person", bbox_extended=ext_bbox))
+
         return detections
 
     def label_crop(self, crop, min_conf=0.25):

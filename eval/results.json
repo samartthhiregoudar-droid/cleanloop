@@ -1,0 +1,4 @@
+{
+  "notice": "No test videos found in C:\\Users\\sam\\cleanloop\\eval\\videos.",
+  "instruction": "Add demo video files to eval/videos/ and re-run python eval/evaluate.py"
+}

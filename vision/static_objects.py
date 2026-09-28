@@ -166,6 +166,8 @@ class StaticObjectDetector:
 
             if best is None:
                 obj = StaticObject(blob, now)
+                # Check if a person is in the frame or near the blob location when object detached
+                obj.near_person_at_origin = len(people) > 0 or any(_intersects(blob, p) for p in people)
                 self.objects[obj.id] = obj
                 matched.add(obj.id)
                 continue
@@ -173,6 +175,8 @@ class StaticObjectDetector:
             best.bbox = blob
             best.last_seen = now
             best.stable_count += 1
+            if len(people) > 0 or any(_intersects(blob, p) for p in people):
+                best.near_person_at_origin = True
             matched.add(best.id)
             if not best.stable and best.stable_count >= self.stable_frames:
                 best.stable = True
@@ -192,4 +196,7 @@ class StaticObjectDetector:
                     self.removed.append(obj)
 
     def stable_objects(self):
-        return [o for o in self.objects.values() if o.stable]
+        if not self.require_person_origin:
+            return [o for o in self.objects.values() if o.stable]
+        # Only return stable objects that originated from a person detachment event
+        return [o for o in self.objects.values() if o.stable and getattr(o, "near_person_at_origin", True)]

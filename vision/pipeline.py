@@ -63,8 +63,8 @@ class CleanLoopPipeline:
         people = self.detector.track_people(frame)
         self.tracker.update(people, ts)
 
-        # 2. Detect static objects
-        person_boxes = [p.bbox for p in people]
+        # 2. Detect static objects (masking out people + held objects as body extension)
+        person_boxes = [getattr(p, "bbox_extended", p.bbox) for p in people]
         objects = self.static_detector.update(frame, ts, person_boxes)
 
         # 3. Process events state machine

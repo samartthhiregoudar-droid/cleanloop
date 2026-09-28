@@ -66,8 +66,8 @@ stateDiagram-v2
 
 - **Vision:** Python, OpenCV, Ultralytics YOLO11n, ByteTrack, MOG2
 - **Audio:** pyttsx3 (offline text-to-speech)
-- **Backend (in progress):** FastAPI, SQLite, WebSockets
-- **Frontend (in progress):** React + Vite + Tailwind
+- **Backend:** FastAPI, SQLite, WebSockets
+- **Frontend:** Glassmorphism Web Dashboard (Live alerts & analytics)
 
 Runs on a normal laptop CPU (~10+ FPS at 640 px); uses an NVIDIA GPU automatically if available.
 
@@ -78,7 +78,7 @@ Runs on a normal laptop CPU (~10+ FPS at 640 px); uses an NVIDIA GPU automatical
 Requires Python 3.10+ and git.
 
 ```powershell
-git clone https://github.com/YOUR-USERNAME/cleanloop.git
+git clone https://github.com/samartthhiregoudar-droid/cleanloop.git
 cd cleanloop
 python -m venv .venv
 .venv\Scripts\activate          # Mac/Linux: source .venv/bin/activate
@@ -87,7 +87,7 @@ python create_structure.py
 python check_setup.py
 ```
 
-### Run
+### Run Vision Pipeline
 
 ```powershell
 python run_vision.py                        # webcam (source in config.yaml)
@@ -95,17 +95,30 @@ python run_vision.py eval/videos/demo.mp4   # a recorded video
 python run_vision.py rtsp://user:pass@IP:554/stream   # an IP / CCTV camera
 ```
 
-Keys: **Q** quit, **R** reset the background model.
+Keys: **Q** quit, **R** reset the background model, **M** toggle motion mask window.
 
 **Tip:** mount the camera about 2 m high, pointing down at a plain floor, with steady lighting. Keep the scene empty for the first 3 seconds while it learns the background.
 
-### Tests
+### Run Backend API & Dashboard
 
 ```powershell
-python -m pytest tests -v
+uvicorn backend.main:app --reload --port 8000
 ```
 
-Unit tests cover true littering, put-down-and-pick-up, redemption, object removed without a person, review timeout, objects with no person nearby, removed-vs-added objects, cooldown, and linking to the closest of two people.
+- **Live Dashboard:** `http://localhost:8000/dashboard/`
+- **Interactive OpenAPI Specs:** `http://localhost:8000/docs`
+
+### Tests & Performance Evaluation
+
+```powershell
+# Run full unit test suite
+python -m pytest tests -v
+
+# Run precision / recall / F1 performance evaluation
+python eval/evaluate.py
+```
+
+Unit tests cover true littering, put-down-and-pick-up, redemption, object removed without a person, review timeout, objects with no person nearby, removed-vs-added objects, cooldown, evidence generation, audio nudges, and backend APIs.
 
 ---
 
@@ -123,7 +136,7 @@ All thresholds live in `config.yaml`, so tuning never needs code changes.
 | `event_engine.redeem_seconds` | 30 | Window to come back and pick it up |
 | `event_engine.cooldown_seconds` | 60 | No repeat alerts at the same spot |
 | `evidence.retention_days` | 7 | Evidence is deleted automatically after this |
-| `nudge.message` | ... | The spoken reminder (delete `storage/audio/*.wav` after changing) |
+| `nudge.message` | ... | The spoken reminder |
 
 Keep camera passwords out of git: put RTSP URLs with credentials in a local `.env` file (already in `.gitignore`).
 
@@ -135,6 +148,8 @@ Keep camera passwords out of git: put RTSP URLs with credentials in a local `.en
 cleanloop/
   config.yaml            all thresholds and settings
   run_vision.py          main entry point
+  check_setup.py         setup and hardware verification
+  create_structure.py    directory setup script
   vision/
     capture.py           webcam / file / RTSP input, reconnect, ring buffer
     detector.py          YOLO wrapper (swappable for a custom model)
@@ -142,14 +157,18 @@ cleanloop/
     static_objects.py    new-object detection, added vs removed
     event_engine.py      littering state machine
     evidence.py          snapshots, clips, incident records, retention
-    nudge.py             spoken reminder and thank-you
-    pipeline.py          wires everything together
+    nudge.py             spoken reminder and thank-you audio TTS
+    pipeline.py          wires vision, event engine, nudges, and storage
     visualize.py         drawing helpers
-  backend/               FastAPI server (in progress)
-  frontend/              React dashboard (in progress)
-  tests/                 unit tests
-  eval/                  test videos and evaluation (in progress)
-  storage/               evidence output (not committed)
+  backend/
+    main.py              FastAPI server & WebSockets
+    database.py          SQLite persistence & analytics
+    api/                 API endpoints package
+  frontend/
+    index.html           glassmorphism dashboard UI
+  tests/                 unit test suite (14 tests)
+  eval/                  evaluation script and benchmark videos
+  storage/               evidence snapshots, clips, and DB output (not committed)
 ```
 
 ---
@@ -171,12 +190,12 @@ cleanloop/
 - [x] Class-agnostic new-object detection (added vs removed)
 - [x] Littering state machine with redemption + unit tests
 - [x] Evidence capture and audio nudge
-- [ ] FastAPI backend with WebSocket alerts
-- [ ] Live dashboard: alerts, review, analytics
-- [ ] Cleanliness score and "clean now" recommendations
+- [x] FastAPI backend with WebSocket alerts
+- [x] Live dashboard: alerts, review, analytics
+- [x] Cleanliness score and "clean now" recommendations
+- [x] Evaluation script (precision / recall / F1)
 - [ ] AI second opinion with plain-English explanations
 - [ ] Blurred evidence with reveal-on-review
-- [ ] Evaluation script (precision / recall / F1)
 - Future: custom litter model for CCTV angles, multi-camera scaling, integration with cleaning crews
 
 ---

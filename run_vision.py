@@ -39,6 +39,10 @@ def main():
     pipeline = CleanLoopPipeline(config, event_callback=on_incident_event)
     pipeline.start()
 
+    # Create resizable OpenCV windows
+    cv2.namedWindow("CleanLoop - Vision Pipeline", cv2.WINDOW_NORMAL)
+    is_fullscreen = False
+
     show_mask = False
     frame_count, fps, t0 = 0, 0.0, time.time()
 
@@ -66,12 +70,18 @@ def main():
             cv2.imshow("CleanLoop - Vision Pipeline", annotated)
 
             if show_mask and pipeline.static_detector.mask is not None:
+                cv2.namedWindow("CleanLoop - Motion Mask", cv2.WINDOW_NORMAL)
                 cv2.imshow("CleanLoop - Motion Mask", pipeline.static_detector.mask)
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):
                 print("Exiting...")
                 break
+            elif key == ord("f"):
+                is_fullscreen = not is_fullscreen
+                prop = cv2.WINDOW_FULLSCREEN if is_fullscreen else cv2.WINDOW_NORMAL
+                cv2.setWindowProperty("CleanLoop - Vision Pipeline", cv2.WND_PROP_FULLSCREEN, prop)
+                print(f"[INFO] Fullscreen {'ENABLED' if is_fullscreen else 'DISABLED'}")
             elif key == ord("r"):
                 pipeline.static_detector.reset()
                 print("[INFO] Background model reset.")

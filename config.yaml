@@ -4,7 +4,7 @@ camera:
   name: "Demo Camera"
   location: "Main Corridor"
   source: 0
-  frame_width: 640
+  frame_width: 1280
   reconnect_seconds: 5
 
 # ---------- Detection ----------

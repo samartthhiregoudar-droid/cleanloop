@@ -3,4 +3,9 @@ opencv-python>=4.9.0
 numpy>=1.26
 pyyaml>=6.0
 python-dotenv>=1.0
-lap>=0.5.12pytest>=8.0
+lap>=0.5.12
+pytest>=8.0
+pyttsx3>=2.90
+fastapi>=0.110.0
+uvicorn>=0.28.0
+websockets>=12.0

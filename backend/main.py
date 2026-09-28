@@ -130,6 +130,18 @@ def trigger_test_nudge():
     return {"status": "ok", "message": "Test audio nudge triggered"}
 
 
+@app.post("/api/bmrcl/call_test")
+def trigger_bmrcl_test_call():
+    from vision.dispatch import BMRCLEscalator
+    config = load_config()
+    escalator = BMRCLEscalator(config)
+    result = escalator.make_bmrcl_call(total_area=15500)
+    return {
+        "status": "ok",
+        "dispatch": result
+    }
+
+
 @app.websocket("/ws/alerts")
 async def websocket_endpoint(websocket: WebSocket):
     await hub.connect(websocket)

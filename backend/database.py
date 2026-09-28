@@ -134,16 +134,18 @@ def get_analytics():
     redeemed = conn.execute("SELECT COUNT(*) FROM incidents WHERE status = 'REDEEMED' OR state = 'REDEEMED'").fetchone()[0]
     pending = conn.execute("SELECT COUNT(*) FROM incidents WHERE status = 'PENDING_REVIEW'").fetchone()[0]
     confirmed_litter = conn.execute("SELECT COUNT(*) FROM incidents WHERE review_decision = 'CONFIRMED_LITTER'").fetchone()[0]
+    bmrcl_escalated = conn.execute("SELECT COUNT(*) FROM incidents WHERE state = 'BMRCL_ESCALATED' OR status = 'BMRCL_ESCALATED'").fetchone()[0]
     conn.close()
 
     redemption_rate = round((redeemed / total * 100), 1) if total > 0 else 100.0
-    cleanliness_score = max(0, min(100, round(100 - (pending * 10 + confirmed_litter * 15 - redeemed * 5), 1)))
+    cleanliness_score = max(0, min(100, round(100 - (pending * 10 + confirmed_litter * 15 - redeemed * 5 + bmrcl_escalated * 20), 1)))
 
     return {
         "total_incidents": total,
         "redeemed_incidents": redeemed,
         "pending_review": pending,
         "confirmed_litter": confirmed_litter,
+        "bmrcl_escalations": bmrcl_escalated,
         "redemption_rate_pct": redemption_rate,
         "cleanliness_score": cleanliness_score
     }

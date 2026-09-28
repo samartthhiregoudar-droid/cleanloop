@@ -292,8 +292,8 @@
             <div class="stat-val cyan" id="stat-redemption">85.7%</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Pending Review</div>
-            <div class="stat-val orange" id="stat-pending">0</div>
+            <div class="stat-label">BMRCL Calls Placed</div>
+            <div class="stat-val" style="color: #ef4444;" id="stat-bmrcl">0</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Total Incidents</div>
@@ -304,7 +304,7 @@
     <main class="main-content">
         <section class="panel">
             <div class="panel-header">
-                <h2 class="panel-title">Recent Incidents Feed</h2>
+                <h2 class="panel-title">Recent Incidents & Dispatch Alerts</h2>
                 <button class="btn" onclick="fetchIncidents()">Refresh Feed</button>
             </div>
             <div class="incident-list" id="incident-list">
@@ -322,6 +322,10 @@
                 <div class="action-card" onclick="testAudioNudge()">
                     <h5>🔊 Test Audio Nudge</h5>
                     <p>Trigger a test spoken audio reminder on the camera speaker.</p>
+                </div>
+                <div class="action-card" onclick="testBMRCLCall()" style="border-left: 4px solid var(--accent-red);">
+                    <h5>📞 Test BMRCL Call Alert</h5>
+                    <p>Simulate an automated voice call to BMRCL Sanitation Dept (+91-80-22969200).</p>
                 </div>
                 <div class="action-card" onclick="location.href='/docs'">
                     <h5>📖 API Documentation</h5>
@@ -341,7 +345,7 @@
                     const data = await res.json();
                     document.getElementById('stat-cleanliness').innerText = `${data.cleanliness_score}%`;
                     document.getElementById('stat-redemption').innerText = `${data.redemption_rate_pct}%`;
-                    document.getElementById('stat-pending').innerText = data.pending_review;
+                    document.getElementById('stat-bmrcl').innerText = data.bmrcl_escalations || 0;
                     document.getElementById('stat-total').innerText = data.total_incidents;
                 }
             } catch (err) {
@@ -385,6 +389,16 @@
                 alert(`Audio Nudge Test: ${data.message}`);
             } catch (err) {
                 alert(`Error testing nudge: ${err}`);
+            }
+        }
+
+        async function testBMRCLCall() {
+            try {
+                const res = await fetch(`${API_BASE}/api/bmrcl/call_test`, { method: 'POST' });
+                const data = await res.json();
+                alert(`🚨 BMRCL Call Alert Triggered!\n\nDepartment: ${data.dispatch.department}\nNumber: ${data.dispatch.phone_number}\nStatus: ${data.dispatch.status}`);
+            } catch (err) {
+                alert(`Error testing BMRCL call: ${err}`);
             }
         }
 

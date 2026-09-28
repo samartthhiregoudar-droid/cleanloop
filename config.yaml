@@ -45,14 +45,14 @@ evidence:
   clip_seconds_after: 5
   retention_days: 7
 
-# ---------- BMRCL Garbage Pile Escalation ----------
-bmrcl_escalation:
+# ---------- BBMP Garbage Black Spot Escalation ----------
+bbmp_escalation:
   enabled: true
-  pile_area_threshold_px: 12000      # Total blob area in pixels that triggers BMRCL dispatch
+  pile_area_threshold_px: 12000      # Total blob area in pixels that triggers BBMP dispatch
   cooldown_seconds: 300              # Minimum time between calls/alerts (5 mins)
-  phone_number: "+91-80-22969200"    # BMRCL Metro Operations & Maintenance Hotline
-  department_name: "BMRCL Maintenance & Sanitation Ops"
-  alert_message: "Urgently required: Large garbage accumulation detected at BMRCL station camera zone."
+  phone_number: "+91-80-22660000"    # BBMP Central Control Room / Ward SWM Team Hotline
+  department_name: "BBMP Solid Waste Management & Marshals"
+  alert_message: "Urgently required: Garbage black spot pile detected in BBMP ward camera zone."
   twilio:
     account_sid: ""                  # Set via environment variable TWILIO_ACCOUNT_SID or here
     auth_token: ""                   # Set via environment variable TWILIO_AUTH_TOKEN or here

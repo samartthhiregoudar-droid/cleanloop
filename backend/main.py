@@ -124,8 +124,8 @@ def read_analytics():
 
 @app.get("/api/leaderboard")
 def read_leaderboard():
-    from backend.database import get_station_leaderboard
-    return get_station_leaderboard()
+    from backend.database import get_ward_leaderboard
+    return get_ward_leaderboard()
 
 
 @app.post("/api/nudge/test")
@@ -136,16 +136,21 @@ def trigger_test_nudge():
     return {"status": "ok", "message": "Test audio nudge triggered"}
 
 
-@app.post("/api/bmrcl/call_test")
-def trigger_bmrcl_test_call():
-    from vision.dispatch import BMRCLEscalator
+@app.post("/api/bbmp/call_test")
+def trigger_bbmp_test_call():
+    from vision.dispatch import BBMPEscalator
     config = load_config()
-    escalator = BMRCLEscalator(config)
-    result = escalator.make_bmrcl_call(total_area=15500)
+    escalator = BBMPEscalator(config)
+    result = escalator.make_bbmp_call(total_area=15500)
     return {
         "status": "ok",
         "dispatch": result
     }
+
+# Alias for backward compatibility
+@app.post("/api/bmrcl/call_test")
+def trigger_bmrcl_test_call():
+    return trigger_bbmp_test_call()
 
 
 @app.websocket("/ws/alerts")

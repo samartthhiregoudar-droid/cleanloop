@@ -4,7 +4,7 @@ import time
 from vision.capture import FrameBuffer, VideoSource
 from vision.config import load_config
 from vision.detector import Detector
-from vision.dispatch import BMRCLEscalator
+from vision.dispatch import BBMPEscalator
 from vision.evidence import EvidenceManager
 from vision.event_engine import EventEngine
 from vision.nudge import AudioNudge
@@ -32,7 +32,7 @@ class CleanLoopPipeline:
         self.static_detector = StaticObjectDetector(**stat_cfg)
         self.engine = EventEngine(**eng_cfg)
         self.nudge = AudioNudge(enabled=True)
-        self.bmrcl_escalator = BMRCLEscalator(self.config)
+        self.bbmp_escalator = BBMPEscalator(self.config)
         self.evidence = EvidenceManager(
             clip_before_sec=evid_cfg["clip_seconds_before"],
             clip_after_sec=evid_cfg["clip_seconds_after"],
@@ -40,7 +40,7 @@ class CleanLoopPipeline:
         )
 
         self.last_cleanup = 0.0
-        self.active_bmrcl_alert = None
+        self.active_bbmp_alert = None
 
     def start(self):
         self.video.start()
@@ -70,12 +70,12 @@ class CleanLoopPipeline:
         # 3. Process events state machine
         events = self.engine.update(ts, self.static_detector.objects, self.static_detector.removed, self.tracker)
 
-        # 4. Check for BMRCL Garbage Pile Escalation
-        bmrcl_alert = self.bmrcl_escalator.check_and_dispatch(self.static_detector.objects.values(), ts)
-        if bmrcl_alert:
-            self.active_bmrcl_alert = (bmrcl_alert, ts)
+        # 4. Check for BBMP Black Spot Garbage Pile Escalation
+        bbmp_alert = self.bbmp_escalator.check_and_dispatch(self.static_detector.objects.values(), ts)
+        if bbmp_alert:
+            self.active_bbmp_alert = (bbmp_alert, ts)
             if self.event_callback:
-                self.event_callback("BMRCL_ESCALATED", bmrcl_alert)
+                self.event_callback("BBMP_ESCALATED", bbmp_alert)
 
         # 5. Handle events (audio nudge, evidence snapshots/clips, callbacks)
         annotated = frame.copy()
@@ -84,12 +84,12 @@ class CleanLoopPipeline:
         draw_objects(annotated, self.static_detector.objects.values())
         draw_cases(annotated, self.engine.cases.values(), self.tracker, ts)
 
-        if self.active_bmrcl_alert:
-            alert, alert_ts = self.active_bmrcl_alert
+        if self.active_bbmp_alert:
+            alert, alert_ts = self.active_bbmp_alert
             if ts - alert_ts < 10.0:  # Display banner for 10 seconds
-                draw_banner(annotated, f"🚨 URGENT: BMRCL CALL PLACED -> {alert['department']} ({alert['phone_number']})", color=(0, 0, 200))
+                draw_banner(annotated, f"🚨 URGENT: BBMP SWM CALL PLACED -> {alert['department']} ({alert['phone_number']})", color=(0, 0, 200))
             else:
-                self.active_bmrcl_alert = None
+                self.active_bbmp_alert = None
 
         for event in events:
             self._handle_event(event, annotated, frame, ts)

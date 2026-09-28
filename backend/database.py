@@ -134,29 +134,33 @@ def get_analytics():
     redeemed = conn.execute("SELECT COUNT(*) FROM incidents WHERE status = 'REDEEMED' OR state = 'REDEEMED'").fetchone()[0]
     pending = conn.execute("SELECT COUNT(*) FROM incidents WHERE status = 'PENDING_REVIEW'").fetchone()[0]
     confirmed_litter = conn.execute("SELECT COUNT(*) FROM incidents WHERE review_decision = 'CONFIRMED_LITTER'").fetchone()[0]
-    bmrcl_escalated = conn.execute("SELECT COUNT(*) FROM incidents WHERE state = 'BMRCL_ESCALATED' OR status = 'BMRCL_ESCALATED'").fetchone()[0]
+    bbmp_escalated = conn.execute("SELECT COUNT(*) FROM incidents WHERE state LIKE '%ESCALATED%' OR status LIKE '%ESCALATED%'").fetchone()[0]
     conn.close()
 
     redemption_rate = round((redeemed / total * 100), 1) if total > 0 else 100.0
-    cleanliness_score = max(0, min(100, round(100 - (pending * 10 + confirmed_litter * 15 - redeemed * 5 + bmrcl_escalated * 20), 1)))
+    cleanliness_score = max(0, min(100, round(100 - (pending * 10 + confirmed_litter * 15 - redeemed * 5 + bbmp_escalated * 20), 1)))
 
     return {
         "total_incidents": total,
         "redeemed_incidents": redeemed,
         "pending_review": pending,
         "confirmed_litter": confirmed_litter,
-        "bmrcl_escalations": bmrcl_escalated,
+        "bbmp_escalations": bbmp_escalated,
+        "bmrcl_escalations": bbmp_escalated,
         "redemption_rate_pct": redemption_rate,
         "cleanliness_score": cleanliness_score
     }
 
 
-def get_station_leaderboard():
-    """Returns gamified BMRCL Station Redemption & Cleanliness Rankings for digital signage."""
+def get_ward_leaderboard():
+    """Returns gamified BBMP Ward Redemption & Cleanliness Rankings for municipal digital signage."""
     return [
-        {"rank": 1, "station": "Indiranagar Metro Station", "redemption_rate_pct": 94.2, "cleanliness_score": 96, "status": "EXCELLENT"},
-        {"rank": 2, "station": "Koramangala Station Zone", "redemption_rate_pct": 91.5, "cleanliness_score": 93, "status": "GREAT"},
-        {"rank": 3, "station": "MG Road Metro Concourse", "redemption_rate_pct": 88.0, "cleanliness_score": 89, "status": "GOOD"},
-        {"rank": 4, "station": "Whitefield Terminal", "redemption_rate_pct": 85.4, "cleanliness_score": 87, "status": "GOOD"},
-        {"rank": 5, "station": "Majestic Interchange", "redemption_rate_pct": 82.1, "cleanliness_score": 83, "status": "NEEDS_IMPROVEMENT"}
+        {"rank": 1, "ward": "Ward 150 - Bellandur", "redemption_rate_pct": 94.2, "cleanliness_score": 96, "status": "EXCELLENT"},
+        {"rank": 2, "ward": "Ward 80 - Indiranagar", "redemption_rate_pct": 91.5, "cleanliness_score": 93, "status": "GREAT"},
+        {"rank": 3, "ward": "Ward 151 - Koramangala", "redemption_rate_pct": 88.0, "cleanliness_score": 89, "status": "GOOD"},
+        {"rank": 4, "ward": "Ward 174 - HSR Layout", "redemption_rate_pct": 85.4, "cleanliness_score": 87, "status": "GOOD"},
+        {"rank": 5, "ward": "Ward 109 - Chickpet Black Spot", "redemption_rate_pct": 81.2, "cleanliness_score": 82, "status": "NEEDS_IMPROVEMENT"}
     ]
+
+# Alias for backward compatibility
+get_station_leaderboard = get_ward_leaderboard

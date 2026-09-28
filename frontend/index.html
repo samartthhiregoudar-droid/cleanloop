@@ -292,8 +292,8 @@
             <div class="stat-val cyan" id="stat-redemption">85.7%</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">BMRCL Calls Placed</div>
-            <div class="stat-val" style="color: #ef4444;" id="stat-bmrcl">0</div>
+            <div class="stat-label">BBMP Calls Placed</div>
+            <div class="stat-val" style="color: #ef4444;" id="stat-bbmp">0</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Total Incidents</div>
@@ -304,7 +304,7 @@
     <main class="main-content">
         <section class="panel">
             <div class="panel-header">
-                <h2 class="panel-title">Recent Incidents & Dispatch Alerts</h2>
+                <h2 class="panel-title">Recent Incidents & BBMP Dispatch Alerts</h2>
                 <button class="btn" onclick="fetchIncidents()">Refresh Feed</button>
             </div>
             <div class="incident-list" id="incident-list">
@@ -316,7 +316,7 @@
 
         <aside class="panel">
             <div class="panel-header">
-                <h2 class="panel-title">🏆 BMRCL Station Leaderboard</h2>
+                <h2 class="panel-title">🏆 BBMP Ward Leaderboard</h2>
             </div>
             <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
                 <!-- Populated dynamically -->
@@ -330,9 +330,9 @@
                     <h5>🔊 Test Audio Nudge</h5>
                     <p>Trigger a test spoken audio reminder on the camera speaker.</p>
                 </div>
-                <div class="action-card" onclick="testBMRCLCall()" style="border-left: 4px solid var(--accent-red);">
-                    <h5>📞 Test BMRCL Call Alert</h5>
-                    <p>Simulate an automated voice call to BMRCL Sanitation Dept (+91-80-22969200).</p>
+                <div class="action-card" onclick="testBBMPCall()" style="border-left: 4px solid var(--accent-red);">
+                    <h5>📞 Test BBMP Call Alert</h5>
+                    <p>Simulate an automated voice call to BBMP SWM & Marshals (+91-80-22660000).</p>
                 </div>
                 <div class="action-card" onclick="location.href='/docs'">
                     <h5>📖 API Documentation</h5>
@@ -352,7 +352,8 @@
                     const data = await res.json();
                     document.getElementById('stat-cleanliness').innerText = `${data.cleanliness_score}%`;
                     document.getElementById('stat-redemption').innerText = `${data.redemption_rate_pct}%`;
-                    document.getElementById('stat-bmrcl').innerText = data.bmrcl_escalations || 0;
+                    const el = document.getElementById('stat-bbmp');
+                    if (el) el.innerText = data.bbmp_escalations || data.bmrcl_escalations || 0;
                     document.getElementById('stat-total').innerText = data.total_incidents;
                 }
             } catch (err) {
@@ -399,13 +400,13 @@
             }
         }
 
-        async function testBMRCLCall() {
+        async function testBBMPCall() {
             try {
-                const res = await fetch(`${API_BASE}/api/bmrcl/call_test`, { method: 'POST' });
+                const res = await fetch(`${API_BASE}/api/bbmp/call_test`, { method: 'POST' });
                 const data = await res.json();
-                alert(`🚨 BMRCL Call Alert Triggered!\n\nDepartment: ${data.dispatch.department}\nNumber: ${data.dispatch.phone_number}\nStatus: ${data.dispatch.status}`);
+                alert(`🚨 BBMP Call Alert Triggered!\n\nDepartment: ${data.dispatch.department}\nNumber: ${data.dispatch.phone_number}\nStatus: ${data.dispatch.status}`);
             } catch (err) {
-                alert(`Error testing BMRCL call: ${err}`);
+                alert(`Error testing BBMP call: ${err}`);
             }
         }
 

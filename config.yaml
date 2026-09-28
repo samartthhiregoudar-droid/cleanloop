@@ -9,21 +9,21 @@ camera:
 
 # ---------- Detection ----------
 detection:
-  model: yolo11n.pt
-  min_person_conf: 0.5
+  model: yolo11s.pt                 # Upgraded to YOLO11 Small for higher detection accuracy
+  min_person_conf: 0.55             # Tighter confidence filter for person detection
   device: auto
 
 # ---------- Static object detection (MOG2) ----------
 static_objects:
-  min_blob_area_px: 300
+  min_blob_area_px: 500             # Raised from 300 to filter out noise & small shadows
   max_blob_area_px: 20000
   learning_rate: 0.001
-  stable_frames: 15
+  stable_frames: 20                 # Requires object to stay still slightly longer (~0.7s)
   warmup_seconds: 3
   match_distance_px: 25
   missing_seconds: 1.5
   max_foreground_ratio: 0.3
-  person_padding: 0.1
+  person_padding: 0.2               # 20% padding around people to ignore feet/shadow artifacts
 
 # ---------- Littering event engine ----------
 event_engine:

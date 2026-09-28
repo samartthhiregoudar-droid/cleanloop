@@ -71,11 +71,21 @@ class Detector:
         """Best non-person COCO label for an object crop, else 'unknown object'."""
         if crop is None or crop.size == 0 or min(crop.shape[:2]) < 10:
             return "unknown object", 0.0
+
+        # Resize small crops up to a minimum of 224x224 px for much higher YOLO detection accuracy
+        h, w = crop.shape[:2]
+        if max(h, w) < 224:
+            scale = 224.0 / max(h, w)
+            crop = cv2.resize(crop, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_CUBIC)
+
         if self._labeler is None:
             self._labeler = YOLO(self.model_path)
 
         results = self._labeler(crop, conf=min_conf, device=self.device, verbose=False)
         boxes = results[0].boxes
+        if boxes is None or len(boxes) == 0:
+            return "unknown object", 0.0
+
         best = None
         for cls, conf in zip(boxes.cls.tolist(), boxes.conf.tolist()):
             if int(cls) == PERSON_CLASS:
